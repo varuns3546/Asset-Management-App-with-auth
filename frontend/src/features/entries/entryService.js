@@ -1,7 +1,7 @@
 import axios from 'axios'
 import {API_BASE_URL} from '@env'
 //const API_URL = API_BASE_URL+'/api/entries/'
-const API_URL = 'http://localhost:3000/api/entries/'
+const API_URL = 'https://asset-management-app-d48j.onrender.com/api/entries/'
 // Create new entry
 const createEntry = async (entryData, token) => {
   const config = {

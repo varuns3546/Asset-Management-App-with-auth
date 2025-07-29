@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 // import {API_BASE_URL} from '@env'
-const API_URL = 'http://localhost:3000/api/users/'
+const API_URL = 'https://asset-management-app-d48j.onrender.com/api/users/'
 
 // Register user
 const register = async (userData) => {

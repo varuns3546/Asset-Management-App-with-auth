@@ -4,7 +4,6 @@ const {supabase, supabaseAdmin} = supabaseClient
 
 const registerUser = asyncHandler(async (req, res) => {
     const {firstName, lastName, email, password, orgPassword} = req.body
-    console.log('attempting register')
     if(!firstName || !lastName || !email || !password || !orgPassword){
         res.status(400)
         throw new Error('Please add all fields')

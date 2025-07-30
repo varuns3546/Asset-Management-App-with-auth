@@ -49,14 +49,26 @@ const registerUser = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error(`Role assignment error: ${setRoleError.message}`)
     }
+    
+    // 3. Sign in the user to get an access token
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+    
+    if (signInError) {
+        res.status(400)
+        throw new Error(`Sign in error: ${signInError.message}`)
+    }
 
-    // Send success response
+    // Send success response with token
     res.status(201).json({
         id: userId,
         email: signUpData.user.email,
         firstName: firstName,
         lastName: lastName,
-        role: role   
+        role: role,
+        token: signInData.session.access_token
     })
 })
 

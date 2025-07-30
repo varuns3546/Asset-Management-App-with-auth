@@ -1,111 +1,179 @@
 import asyncHandler from 'express-async-handler';
-import Entry from '../models/entryModel.js';
-import User from '../models/userModel.js';
+import supabaseClient from '../config/supabaseClient.js';
+
+const {supabase, supabaseAdmin, createUserClient} = supabaseClient;
+
+const authenticateUser = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+        
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+        
+    if (error || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // Use the createUserClient from your config file instead
+    req.supabase = createUserClient(token);
+        
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Authentication failed' });
+  }
+};
 
 const getEntries = asyncHandler(async (req, res) => {
-    try{
-        const entries = await Entry.find({user: req.user._id})
-        res.json(entries);
-    } catch (error){
-        console.error('Error fetching entries:', error); // Add this line
-        res.status(500).json({
-            success: false,
-            message: 'Failed to get entries'
-        });
-    }
-    
-})
+  const { data, error } = await req.supabase
+    .from('entries')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return res.status(400).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+
+  res.status(200).json(data);
+});
 
 const getEntry = asyncHandler(async (req, res) => {
-    const entry = await Entry.findById(req.params.id)
-    if(!entry){
-        res.status(404)
-        throw new Error('Entry not found')
-    }
-    if(!req.user){
-        res.status(401)
-        throw new Error('User not found')
-    }
-    if(entry.user.toString() !== req.user._id){
-        res.status(401)
-        throw new Error('User not authorized')
-    }
-    res.status(200).json(entry)
+  const { id } = req.params;
 
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      error: 'Entry ID is required'
+    });
+  }
 
+  const { data, error } = await req.supabase
+    .from('entries')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    return res.status(404).json({ 
+      success: false,
+      error: 'Entry not found' 
+    });
+  }
+
+  res.status(200).json(data);
 });
 
 const createEntry = asyncHandler(async (req, res) => {
-    const title= req.body.title
-    const content=req.body.content
-    if (!title || !content) {
-        res.status(400)
-        throw new Error('Please complete fields')
-    }
-    {}
-    const entry = new Entry({
-        title,
-        content,
-        user: req.user._id
+  const { title, content } = req.body;
+
+  // Validation
+  if (!title || !content) {
+    return res.status(400).json({
+      success: false,
+      error: 'Title and content are required'
     });
-
-
-    const savedEntry = await entry.save();
-
-    res.status(200).json(entry)
-  
-})
-
-
-const deleteEntry = asyncHandler(async (req, res) => {
-  const entry = await Entry.findById(req.params.id)
-
-  if (!entry) {
-    res.status(400)
-    throw new Error('Goal not found')
   }
 
-  // Make sure the logged in user matches the entry user
-  if (entry.user.toString() !== req.user.id) {
-    res.status(401)
-    throw new Error('User not authorized')
-  }
-
-  await entry.deleteOne()
-
-  res.status(200).json(req.params.id)
-})
-
-const updateEntry = asyncHandler(async (req, res) => {
-    const entry = await Entry.findById(req.params.id)
-    if(!entry){
-        res.status(404)
-        throw new Error('Entry not found')
-    }
-    if(!req.user){
-        res.status(401)
-        throw new Error('User not found')
-    }
-    if(entry.user.toString() !== req.user._id){
-        res.status(401)
-        throw new Error('User not authorized')
-    }
-
-    const updatedEntry = await Entry.findByIdAndUpdate
-    (req.params.id, req.body, {
-        new: true,
+  const { data, error } = await req.supabase
+    .from('entries')
+    .insert({
+      title,
+      content,
+      user_id: req.user.id
     })
-    
+    .select()
+    .single();
 
-    res.status(200).json(updateEntry)
+  if (error) {
+    return res.status(400).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
 
-
+  res.status(201).json(data);
 });
 
-export default{ 
-    getEntries,
-    getEntry,
-    createEntry,
-    deleteEntry,
-    updateEntry
-}
+const updateEntry = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { title, content } = req.body;
+
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      error: 'Entry ID is required'
+    });
+  }
+
+  // Validation - at least one field should be provided
+  if (!title && !content) {
+    return res.status(400).json({
+      success: false,
+      error: 'At least title or content must be provided'
+    });
+  }
+
+  // Build update object with only provided fields
+  const updateData = {};
+  if (title !== undefined) updateData.title = title;
+  if (content !== undefined) updateData.content = content;
+
+  const { data, error } = await req.supabase
+    .from('entries')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    return res.status(400).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+
+  res.status(200).json(data);
+});
+
+const deleteEntry = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      error: 'Entry ID is required'
+    });
+  }
+
+  const { error } = await req.supabase
+    .from('entries')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    return res.status(400).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'Entry deleted successfully'
+  });
+});
+
+export default {
+  authenticateUser,
+  getEntries,
+  getEntry,
+  createEntry,
+  deleteEntry,
+  updateEntry
+};

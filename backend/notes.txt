@@ -1,0 +1,1 @@
+passwords are not required to be secure. set up in supabase.com

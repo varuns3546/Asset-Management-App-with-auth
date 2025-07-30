@@ -108,7 +108,7 @@ export const entrySlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.entries = state.entries.filter(
-          (entry) => entry.id !== action.payload
+          (entry) => entry.id !== action.payload.id
         )
         console.log('entries after filter', state.entries);
 

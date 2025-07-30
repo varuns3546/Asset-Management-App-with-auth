@@ -76,7 +76,7 @@ const DashboardScreen = ({navigation}) => {
                        {entries?.length > 0 ? (
                             <View style={styles.entriesContainer}>
                                 {entries.slice().reverse().map((entry, index) => (
-                                    <EntryItem key={index} entry={entry} />
+                                    <EntryItem key={entry.id} entry={entry} />
                                 ))}
                           </View>
                           

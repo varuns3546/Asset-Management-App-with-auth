@@ -1,16 +1,23 @@
 import express from 'express';
 import uploadController from '../controllers/uploadController.js';
-const { getUploads, getUpload, createUpload, deleteUpload, updateUpload} = entryController
+const { getDocuments, getPhotos, getUpload, uploadDocument, uploadPhoto, deleteUpload } = uploadController;
 import supabaseClient from '../config/supabaseClient.js';
-const {authenticateUser} =supabaseClient
+const {authenticateUser} = supabaseClient;
 const router = express.Router();
 
-router.use(authenticateUser)
+router.use(authenticateUser);
 
-router.get('/', getUploads)
-router.get('/:id', getUpload)
-router.post('/', createUpload)
-router.delete('/:id', deleteUpload)
-router.put('/:id', updateUpload)
+// Get all documents
+router.get('/documents', getDocuments);
+// Get all photos  
+router.get('/photos', getPhotos);
+// Get specific upload by ID
+router.get('/:id', getUpload);
+// Upload document
+router.post('/document', uploadDocument);
+// Upload photo
+router.post('/photo', uploadPhoto);
+// Delete upload
+router.delete('/:id', deleteUpload);
 
 export default router;

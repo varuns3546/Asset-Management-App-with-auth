@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
-// import {API_BASE_URL} from '@env'
-const API_URL = 'https://cautious-capybara-69v6pgxx7p4rf5qgj-3000.app.github.dev/api/users/'
-
+import {API_BASE_URL2} from '@env'
+//const API_URL = API_BASE_URL+'/api/entries/'
+const API_URL = `${API_BASE_URL2}/api/users/`
 // Register user
 const register = async (userData) => {
   

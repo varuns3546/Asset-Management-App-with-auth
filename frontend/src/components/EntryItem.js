@@ -6,7 +6,7 @@ const EntryItem = ({entry}) => {
     const dispatch = useDispatch()
 
     const handleDelete = () => {
-        dispatch(deleteEntry(entry._id))
+        dispatch(deleteEntry(entry.id))
     }
     return(
         <View style={styles.container}>

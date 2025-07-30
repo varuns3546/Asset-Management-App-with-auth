@@ -46,7 +46,7 @@ const Screen = () => {
         }
     };
     const handleEntryPressed = async (entry) => {
-        setEntryIDToUpdate(entry._id)
+        setEntryIDToUpdate(entry.id)
         setTitle(entry.title)
         setContent(entry.content)
     }
@@ -84,13 +84,13 @@ const Screen = () => {
       </TouchableOpacity>
       <Text style={styles.sectionTitle}>Entries:</Text>
       {entries.map((entry) => (
-        <View key={entry._id} style={styles.entryBox}>
+        <View key={entry.id} style={styles.entryBox}>
           <Text style={styles.entryTitle}>{entry.title}</Text>
           <Text style={styles.entryContent}>{entry.content}</Text>
             <TouchableOpacity onPress={() => handleEntryPressed(entry)} style={styles.button}>
                 <Text>Update</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleDelete(entry._id)} style={styles.button}>
+            <TouchableOpacity onPress={handleDelete(entry.id)} style={styles.button}>
                 <Text>Delete</Text>
             </TouchableOpacity>
         </View>

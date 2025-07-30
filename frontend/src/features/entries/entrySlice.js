@@ -52,7 +52,7 @@ export const deleteEntry = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token
-      data = await entryService.deleteEntry(id, token)
+      const data = await entryService.deleteEntry(id, token)
       console.log('delete entry result', data)
       return data
     } catch (error) {
@@ -108,7 +108,7 @@ export const entrySlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.entries = state.entries.filter(
-          (entry) => entry._id !== action.payload
+          (entry) => entry.id !== action.payload
         )
         console.log('entries after filter', state.entries);
 

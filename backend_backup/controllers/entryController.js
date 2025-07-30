@@ -4,7 +4,7 @@ import User from '../models/userModel.js';
 
 const getEntries = asyncHandler(async (req, res) => {
     try{
-        const entries = await Entry.find({user: req.user._id})
+        const entries = await Entry.find({user: req.user.id})
         res.json(entries);
     } catch (error){
         console.error('Error fetching entries:', error); // Add this line
@@ -26,7 +26,7 @@ const getEntry = asyncHandler(async (req, res) => {
         res.status(401)
         throw new Error('User not found')
     }
-    if(entry.user.toString() !== req.user._id){
+    if(entry.user.toString() !== req.user.id){
         res.status(401)
         throw new Error('User not authorized')
     }
@@ -46,7 +46,7 @@ const createEntry = asyncHandler(async (req, res) => {
     const entry = new Entry({
         title,
         content,
-        user: req.user._id
+        user: req.user.id
     });
 
 
@@ -86,7 +86,7 @@ const updateEntry = asyncHandler(async (req, res) => {
         res.status(401)
         throw new Error('User not found')
     }
-    if(entry.user.toString() !== req.user._id){
+    if(entry.user.toString() !== req.user.id){
         res.status(401)
         throw new Error('User not authorized')
     }

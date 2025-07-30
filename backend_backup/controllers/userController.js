@@ -34,12 +34,12 @@ const registerUser = asyncHandler(async (req, res) => {
     if(user){
         console.log('Success registering', user.firstName)
         res.status(201).json({
-            _id: user._id,
+            id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
             accountType: user.accountType,
-            token: generateToken(user._id)
+            token: generateToken(user.id)
         })
     } else {
         res.status(400)
@@ -63,12 +63,12 @@ const loginUser = asyncHandler(async (req, res) => {
         console.log('Success logging in', user.firstName)
 
         res.json({
-            _id: user._id,
+            id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
             accountType: user.accountType,
-            token: generateToken(user._id)
+            token: generateToken(user.id)
 
         })
     } else {
@@ -79,9 +79,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
 //private route
 const getUser = asyncHandler(async (req, res) => {
-    const {_id, firstName, lastName, email, accountType} = await User.findById(req.user._id)
+    const {id, firstName, lastName, email, accountType} = await User.findById(req.user.id)
     res.status(200).json({
-        _id,
+        id,
         firstName,
         lastName,
         email,

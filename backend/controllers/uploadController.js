@@ -1,9 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import multer from 'multer';
 import { decode } from 'base64-arraybuffer';
-import supabaseClient from '../config/supabaseClient.js';
-
-const { supabase } = supabaseClient;
 
 // File type configurations
 const allowedDocumentExtensions = [
@@ -58,21 +55,45 @@ const upload = multer({
   }
 });
 
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 KB';
+  
+  const k = 1024;
+  const mb = k * k;
+  
+  if (bytes >= mb) {
+    return (bytes / mb).toFixed(2) + ' MB';
+  } else {
+    return (bytes / k).toFixed(2) + ' KB';
+  }
+};
+
 // Helper function to upload file to Supabase
-const uploadToSupabase = async (file, userId, folder) => {
+const uploadToSupabase = async (file, title, userId, folder = 'uploads', supabaseClient) => {
   try {
     // Convert buffer to base64 then to ArrayBuffer
     const fileBase64 = decode(file.buffer.toString('base64'));
     
-    // Generate unique filename
-    const timestamp = Date.now();
+    // Generate unique filename with readable timestamp
+    const now = new Date();
+    const timestamp = now.toISOString().replace('T', '_').replace(/\.\d{3}Z$/, ''); // Format: 2024-01-15_10:30:45
     const fileExtension = '.' + file.originalname.split('.').pop().toLowerCase();
-    const fileName = `${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    
+    // Use title if provided, otherwise use original filename
+    let baseFileName;
+    if (title && title.trim()) {
+      // Clean the title for filename use
+      baseFileName = title.trim().replace(/[^a-zA-Z0-9.-]/g, '_');
+    } else {
+      baseFileName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    }
+    
+    const fileName = `${timestamp}-${baseFileName}`;
     const filePath = `${userId}/${folder}/${fileName}`;
     
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from(folder)
+    // Upload to Supabase Storage using authenticated client
+    const { data, error } = await supabaseClient.storage
+      .from('uploads')
       .upload(filePath, fileBase64, {
         contentType: file.mimetype,
         upsert: false
@@ -82,17 +103,15 @@ const uploadToSupabase = async (file, userId, folder) => {
       throw error;
     }
     
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from(folder)
-      .getPublicUrl(data.path);
+    
     
     return {
       path: data.path,
-      publicUrl: urlData.publicUrl,
       fileName: fileName,
       originalName: file.originalname,
-      fileSize: file.size,
+      title: title || null,
+      fileSize: file.size, // Keep original bytes for reference
+      fileSizeFormatted: formatFileSize(file.size), // Add formatted size
       mimeType: file.mimetype
     };
   } catch (error) {
@@ -106,8 +125,8 @@ const getDocuments = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     
     // List files in the documents folder
-    const { data, error } = await supabase.storage
-      .from(uploads)
+    const { data, error } = await req.supabase.storage
+      .from('uploads')
       .list(`${userId}/documents`, {
         limit: 100,
         offset: 0
@@ -117,28 +136,27 @@ const getDocuments = asyncHandler(async (req, res) => {
       throw error;
     }
     
-    // Get public URLs for each file
-    const documentsWithUrls = await Promise.all(
-      data.map(async (file) => {
-        const { data: urlData } = supabase.storage
-          .from('uploads')
-          .getPublicUrl(`${userId}/documents/${file.name}`);
-        
-        return {
-          id: file.id,
-          name: file.name,
-          size: file.metadata?.size || 0,
-          created_at: file.created_at,
-          updated_at: file.updated_at,
-          publicUrl: urlData.publicUrl
-        };
-      })
-    );
+    // Convert file size to readable format (KB or MB)
+   
+    
+    // Get file information
+    const documentsWithInfo = data.map((file) => {
+      const fileSize = file.metadata?.size || 0;
+      
+      return {
+        id: file.id,
+        name: file.name,
+        size: fileSize,
+        sizeFormatted: formatFileSize(fileSize),
+        created_at: file.created_at,
+        updated_at: file.updated_at
+      };
+    });
     
     res.status(200).json({
       success: true,
-      data: documentsWithUrls,
-      count: documentsWithUrls.length
+      data: documentsWithInfo,
+      count: documentsWithInfo.length
     });
   } catch (error) {
     res.status(500).json({
@@ -155,7 +173,7 @@ const getPhotos = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     
     // List files in the photos folder
-    const { data, error } = await supabase.storage
+    const { data, error } = await req.supabase.storage
       .from('uploads')
       .list(`${userId}/photos`, {
         limit: 100,
@@ -166,28 +184,27 @@ const getPhotos = asyncHandler(async (req, res) => {
       throw error;
     }
     
-    // Get public URLs for each file
-    const photosWithUrls = await Promise.all(
-      data.map(async (file) => {
-        const { data: urlData } = supabase.storage
-          .from('uploads')
-          .getPublicUrl(`${userId}/photos/${file.name}`);
-        
-        return {
-          id: file.id,
-          name: file.name,
-          size: file.metadata?.size || 0,
-          created_at: file.created_at,
-          updated_at: file.updated_at,
-          publicUrl: urlData.publicUrl
-        };
-      })
-    );
+    // Convert file size to readable format (KB or MB)
+
+    
+    // Get file information
+    const photosWithInfo = data.map((file) => {
+      const fileSize = file.metadata?.size || 0;
+      
+      return {
+        id: file.id,
+        name: file.name,
+        size: fileSize,
+        sizeFormatted: formatFileSize(fileSize),
+        created_at: file.created_at,
+        updated_at: file.updated_at
+      };
+    });
     
     res.status(200).json({
       success: true,
-      data: photosWithUrls,
-      count: photosWithUrls.length
+      data: photosWithInfo,
+      count: photosWithInfo.length
     });
   } catch (error) {
     res.status(500).json({
@@ -198,22 +215,107 @@ const getPhotos = asyncHandler(async (req, res) => {
   }
 });
 
-// Get specific upload by ID
-const getUpload = asyncHandler(async (req, res) => {
+// Get specific document by filename
+const getDocument = asyncHandler(async (req, res) => {
   try {
-    const { id } = req.params;
+    const { fileName } = req.params; // This will be just the filename
     const userId = req.user.id;
     
-    // This would require a database to store file metadata with IDs
-    // For now, we'll return an error suggesting to use the list endpoints
-    res.status(501).json({
-      success: false,
-      message: 'Get specific upload by ID not implemented. Use /documents or /photos endpoints to list files.'
+    // Get file from documents folder
+    const { data, error } = await req.supabase.storage
+      .from('uploads')
+      .list(`${userId}/documents`, {
+        limit: 100,
+        offset: 0
+      });
+    
+    if (error) {
+      throw error;
+    }
+    
+    const file = data.find(f => f.name === fileName);
+    
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found'
+      });
+    }
+    
+    const fileSize = file.metadata?.size || 0;
+    const filePath = `${userId}/documents/${file.name}`;
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        id: file.id,
+        name: file.name,
+        path: filePath,
+        size: fileSize,
+        sizeFormatted: formatFileSize(fileSize),
+        type: 'documents',
+        created_at: file.created_at,
+        updated_at: file.updated_at,
+        mimeType: file.metadata?.mimetype || 'unknown'
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve upload',
+      message: 'Failed to retrieve document',
+      error: error.message
+    });
+  }
+});
+
+// Get specific photo by filename
+const getPhoto = asyncHandler(async (req, res) => {
+  try {
+    const { fileName } = req.params; // This will be just the filename
+    const userId = req.user.id;
+    
+    // Get file from photos folder
+    const { data, error } = await req.supabase.storage
+      .from('uploads')
+      .list(`${userId}/photos`, {
+        limit: 100,
+        offset: 0
+      });
+    
+    if (error) {
+      throw error;
+    }
+    
+    const file = data.find(f => f.name === id);
+    
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: 'Photo not found'
+      });
+    }
+    
+    const fileSize = file.metadata?.size || 0;
+    const filePath = `${userId}/photos/${file.name}`;
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        id: file.id,
+        name: file.name,
+        path: filePath,
+        size: fileSize,
+        sizeFormatted: formatFileSize(fileSize),
+        type: 'photos',
+        created_at: file.created_at,
+        updated_at: file.updated_at,
+        mimeType: file.metadata?.mimetype || 'unknown'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve photo',
       error: error.message
     });
   }
@@ -232,7 +334,7 @@ const uploadDocument = [
       }
       
       const userId = req.user.id;
-      const uploadResult = await uploadToSupabase(req.file, userId, 'documents');
+      const uploadResult = await uploadToSupabase(req.file, req.body.title, userId, 'documents', req.supabase);
       
       res.status(201).json({
         success: true,
@@ -265,7 +367,7 @@ const uploadPhoto = [
       }
       
       const userId = req.user.id;
-      const uploadResult = await uploadToSupabase(req.file, userId, 'photos');
+      const uploadResult = await uploadToSupabase(req.file, req.body.title, userId, 'photos', req.supabase);
       
       res.status(201).json({
         success: true,
@@ -285,32 +387,109 @@ const uploadPhoto = [
   })
 ];
 
-// Delete upload
-const deleteUpload = asyncHandler(async (req, res) => {
+// Delete document
+const deleteDocument = asyncHandler(async (req, res) => {
   try {
-    const { id } = req.params;
+    const { fileName } = req.params; // This will be just the filename
     const userId = req.user.id;
     
-    // Since we don't have a database mapping, we expect the full file path as ID
-    // In a real app, you'd store file metadata in a database
-    const filePath = `${userId}/${id}`;
-    
-    const { error } = await supabase.storage
+    // Get file from documents folder
+    const { data, error } = await req.supabase.storage
       .from('uploads')
-      .remove([filePath]);
+      .list(`${userId}/documents`, {
+        limit: 100,
+        offset: 0
+      });
     
     if (error) {
       throw error;
     }
     
+    const file = data.find(f => f.name === fileName);
+    
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found'
+      });
+    }
+    
+    // Delete the file using the full path
+    const filePath = `${userId}/documents/${file.name}`;
+    const { error: deleteError } = await req.supabase.storage
+      .from('uploads')
+      .remove([filePath]);
+    
+    if (deleteError) {
+      throw deleteError;
+    }
+    
     res.status(200).json({
       success: true,
-      message: 'File deleted successfully'
+      message: 'Document deleted successfully',
+      data: {
+        deletedFile: file.name,
+        fileType: 'documents'
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Failed to delete file',
+      message: 'Failed to delete document',
+      error: error.message
+    });
+  }
+});
+
+// Delete photo
+const deletePhoto = asyncHandler(async (req, res) => {
+  try {
+    const { fileName } = req.params; // This will be just the filename
+    const userId = req.user.id;
+    
+    // Get file from photos folder
+    const { data, error } = await req.supabase.storage
+      .from('uploads')
+      .list(`${userId}/photos`, {
+        limit: 100,
+        offset: 0
+      });
+    
+    if (error) {
+      throw error;
+    }
+    
+    const file = data.find(f => f.name === fileName);
+    
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: 'Photo not found'
+      });
+    }
+    
+    // Delete the file using the full path
+    const filePath = `${userId}/photos/${file.name}`;
+    const { error: deleteError } = await req.supabase.storage
+      .from('uploads')
+      .remove([filePath]);
+    
+    if (deleteError) {
+      throw deleteError;
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Photo deleted successfully',
+      data: {
+        deletedFile: file.name,
+        fileType: 'photos'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete photo',
       error: error.message
     });
   }
@@ -319,10 +498,12 @@ const deleteUpload = asyncHandler(async (req, res) => {
 export default {
   getDocuments,
   getPhotos,
-  getUpload,
+  getDocument,
+  getPhoto,
   uploadDocument,
   uploadPhoto,
-  deleteUpload,
+  deleteDocument,
+  deletePhoto,
   // Export multer middleware for use in routes if needed
   upload
 };

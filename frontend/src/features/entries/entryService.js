@@ -1,7 +1,7 @@
 import axios from 'axios'
-import {API_BASE_URL2} from '@env'
+import {API_BASE_URL} from '@env'
 //const API_URL = API_BASE_URL+'/api/entries/'
-const API_URL = `${API_BASE_URL2}/api/entries/`
+const API_URL = `${API_BASE_URL}/api/entries/`
 const createEntry = async (entryData, token) => {
   const config = {
     headers: {

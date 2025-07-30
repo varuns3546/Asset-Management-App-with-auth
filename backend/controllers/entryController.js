@@ -165,7 +165,8 @@ const deleteEntry = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Entry deleted successfully'
+    message: 'Entry deleted successfully',
+    id: id
   });
 });
 

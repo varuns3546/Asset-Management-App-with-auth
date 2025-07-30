@@ -107,7 +107,7 @@ const getDocuments = asyncHandler(async (req, res) => {
     
     // List files in the documents folder
     const { data, error } = await supabase.storage
-      .from(uploads)
+      .from('uploads')
       .list(`${userId}/documents`, {
         limit: 100,
         offset: 0

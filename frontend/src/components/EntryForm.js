@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { createEntry } from '../features/entries/entrySlice'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { createEntry, reset } from '../features/entries/entrySlice'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { loadUser } from '../features/auth/authSlice'
 const EntryForm = ({navigation}) => {
     const [formData, setFormData] = useState({
@@ -9,15 +9,37 @@ const EntryForm = ({navigation}) => {
         content: '',
     })
     const dispatch = useDispatch()
+    const { isLoading, isError, isSuccess, message } = useSelector((state) => state.entries)
+    
     useEffect(() => {
-            dispatch(loadUser())
-        }, [])
+        dispatch(loadUser())
+    }, [])
+    
+    useEffect(() => {
+        if (isError) {
+            Alert.alert('Error', message || 'Failed to create entry')
+        }
+        
+        if (isSuccess) {
+            setFormData({
+                title: '',
+                content: '',
+            })
+        }
+        
+        // Reset state after handling
+        if (isError || isSuccess) {
+            dispatch(reset())
+        }
+    }, [isError, isSuccess, message, dispatch])
     const handleSubmit = () => {
+        // Validate form data
+        if (!formData.title.trim() || !formData.content.trim()) {
+            Alert.alert('Validation Error', 'Title and content are required')
+            return
+        }
+        
         dispatch(createEntry(formData))
-        setFormData({
-            title: '',
-            content: '',
-        })
     }
 
     const handleChange = (field, value) => {
@@ -38,8 +60,14 @@ const EntryForm = ({navigation}) => {
                 value={formData.content}
                 onChangeText={(value) => handleChange('content', value)}
             />
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                <Text style={styles.buttonText}>Add Entry</Text>
+            <TouchableOpacity 
+                style={[styles.button, isLoading && styles.buttonDisabled]} 
+                onPress={handleSubmit}
+                disabled={isLoading}
+            >
+                <Text style={styles.buttonText}>
+                    {isLoading ? 'Adding...' : 'Add Entry'}
+                </Text>
             </TouchableOpacity>
         </View>
     )
@@ -75,6 +103,9 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    buttonDisabled: {
+        backgroundColor: '#ccc',
     },
     content: {
         fontSize: 16,

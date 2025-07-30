@@ -1,31 +1,4 @@
 import asyncHandler from 'express-async-handler';
-import supabaseClient from '../config/supabaseClient.js';
-
-const {supabase, supabaseAdmin, createUserClient} = supabaseClient;
-
-const authenticateUser = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
-        
-    if (!token) {
-      return res.status(401).json({ error: 'No token provided' });
-    }
-
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-        
-    if (error || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    // Use the createUserClient from your config file instead
-    req.supabase = createUserClient(token);
-        
-    req.user = user;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: 'Authentication failed' });
-  }
-};
 
 const getEntries = asyncHandler(async (req, res) => {
   const { data, error } = await req.supabase
@@ -167,7 +140,6 @@ const deleteEntry = asyncHandler(async (req, res) => {
 });
 
 export default {
-  authenticateUser,
   getEntries,
   getEntry,
   createEntry,

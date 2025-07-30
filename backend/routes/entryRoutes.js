@@ -1,6 +1,8 @@
 import express from 'express';
 import entryController from '../controllers/entryController.js';
-const {authenticateUser, getEntries, getEntry, createEntry, deleteEntry, updateEntry} = entryController
+import supabaseClient from '../config/supabaseClient.js';
+const { getEntries, getEntry, createEntry, deleteEntry, updateEntry} = entryController
+const {authenticateUser} =supabaseClient
 const router = express.Router();
 
 router.use(authenticateUser)

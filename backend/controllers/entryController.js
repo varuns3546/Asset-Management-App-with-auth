@@ -163,10 +163,7 @@ const deleteEntry = asyncHandler(async (req, res) => {
     });
   }
 
-  res.status(200).json({
-    success: true,
-    message: 'Entry deleted successfully'
-  });
+  res.status(200).json(id);
 });
 
 export default {

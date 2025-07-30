@@ -152,42 +152,26 @@ const getDocuments = asyncHandler(async (req, res) => {
 // Get all photos for the authenticated user
 const getPhotos = asyncHandler(async (req, res) => {
   try {
-    const userId = req.user.id;
-    
-    // List files in the photos folder
-    const { data, error } = await supabase.storage
-      .from('uploads')
-      .list(`${userId}/photos`, {
-        limit: 100,
-        offset: 0
-      });
-    
+    // Get photos from database using the user's authenticated client
+    const { data, error } = await req.supabase
+      .from('photos')
+      .select('*')
+      .order('created_at', { ascending: false });
+
     if (error) {
       throw error;
     }
-    
-    // Get public URLs for each file
-    const photosWithUrls = await Promise.all(
-      data.map(async (file) => {
-        const { data: urlData } = supabase.storage
-          .from('uploads')
-          .getPublicUrl(`${userId}/photos/${file.name}`);
-        
-        return {
-          id: file.id,
-          name: file.name,
-          size: file.metadata?.size || 0,
-          created_at: file.created_at,
-          updated_at: file.updated_at,
-          publicUrl: urlData.publicUrl
-        };
-      })
-    );
+
+    // Add type field for consistency
+    const photosWithType = data.map(photo => ({
+      ...photo,
+      type: 'photo'
+    }));
     
     res.status(200).json({
       success: true,
-      data: photosWithUrls,
-      count: photosWithUrls.length
+      data: photosWithType,
+      count: photosWithType.length
     });
   } catch (error) {
     res.status(500).json({
@@ -265,13 +249,42 @@ const uploadPhoto = [
       }
       
       const userId = req.user.id;
+      
+      // Upload file to Supabase Storage
       const uploadResult = await uploadToSupabase(req.file, userId, 'photos');
+      
+      // Insert photo metadata into database using the user's authenticated client
+      const { data: photoRecord, error: dbError } = await req.supabase
+        .from('photos')
+        .insert({
+          user_id: userId,
+          file_name: uploadResult.fileName,
+          original_name: uploadResult.originalName,
+          file_path: uploadResult.path,
+          public_url: uploadResult.publicUrl,
+          file_size: uploadResult.fileSize,
+          mime_type: uploadResult.mimeType
+        })
+        .select()
+        .single();
+      
+      if (dbError) {
+        // If database insertion fails, we should clean up the uploaded file
+        try {
+          await supabase.storage
+            .from('uploads')
+            .remove([uploadResult.path]);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup uploaded file:', cleanupError);
+        }
+        throw new Error(`Database insertion failed: ${dbError.message}`);
+      }
       
       res.status(201).json({
         success: true,
         message: 'Photo uploaded successfully',
         data: {
-          ...uploadResult,
+          ...photoRecord,
           type: 'photo'
         }
       });

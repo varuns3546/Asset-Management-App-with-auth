@@ -59,7 +59,7 @@ const upload = multer({
 });
 
 // Helper function to upload file to Supabase
-const uploadToSupabase = async (file, userId, folder = 'uploads') => {
+const uploadToSupabase = async (file, userId, folder) => {
   try {
     // Convert buffer to base64 then to ArrayBuffer
     const fileBase64 = decode(file.buffer.toString('base64'));
@@ -72,7 +72,7 @@ const uploadToSupabase = async (file, userId, folder = 'uploads') => {
     
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
-      .from('uploads')
+      .from(folder)
       .upload(filePath, fileBase64, {
         contentType: file.mimetype,
         upsert: false
@@ -84,7 +84,7 @@ const uploadToSupabase = async (file, userId, folder = 'uploads') => {
     
     // Get public URL
     const { data: urlData } = supabase.storage
-      .from('uploads')
+      .from(folder)
       .getPublicUrl(data.path);
     
     return {
@@ -107,7 +107,7 @@ const getDocuments = asyncHandler(async (req, res) => {
     
     // List files in the documents folder
     const { data, error } = await supabase.storage
-      .from('uploads')
+      .from(uploads)
       .list(`${userId}/documents`, {
         limit: 100,
         offset: 0

@@ -24,6 +24,8 @@ const LoginScreen = ({navigation}) => {
         email: '', 
         password: '',
       })
+    
+    const [showPassword, setShowPassword] = useState(false)
 
     const { email, password } = formData
     const dispatch = useDispatch()
@@ -84,17 +86,33 @@ const LoginScreen = ({navigation}) => {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
+                    textContentType="username"
+                    autoComplete="email"
                 />
             </View>
             <View style={styles.formGroup}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    value={formData.password}
-                    onChangeText={(value) => updateField('password', value)}
-                    secureTextEntry
-                    autoCapitalize="none"
-                />
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Password"
+                        value={formData.password}
+                        onChangeText={(value) => updateField('password', value)}
+                        secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                        textContentType="password"
+                        autoComplete="password"
+                    />
+                    <TouchableOpacity 
+                        style={styles.eyeIcon}
+                        onPress={() => setShowPassword(!showPassword)}
+                    >
+                        <Ionicons 
+                            name={showPassword ? "eye-off" : "eye"} 
+                            size={20} 
+                            color="#666" 
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
             <TouchableOpacity style={styles.button} onPress={onSubmit}>
             <Text style={styles.buttonText}>Submit</Text>
@@ -159,6 +177,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
+    flex: 1,
+    },
+    inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    },
+    eyeIcon: {
+    paddingHorizontal: 15,
+    paddingVertical: 12,
     },
     button: {
     backgroundColor: '#007AFF',

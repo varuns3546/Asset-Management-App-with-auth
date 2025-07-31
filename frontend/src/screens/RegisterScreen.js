@@ -24,6 +24,9 @@ const RegisterScreen = ({navigation}) => {
         confirmPassword: '', 
         orgPassword: ''
       })
+    
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const{firstName, lastName, email, 
         password, confirmPassword, orgPassword} = formData
@@ -82,7 +85,7 @@ const RegisterScreen = ({navigation}) => {
             <Text style={styles.subtitle}>Create an account</Text>
         </View>
 
-        <View style={styles.form}>
+        <View style={styles.form} data-testid="registration-form">
             <View style={styles.formGroup}>
             <TextInput
                 style={styles.input}
@@ -90,6 +93,12 @@ const RegisterScreen = ({navigation}) => {
                 value={formData.firstName}
                 onChangeText={(value) => updateField('firstName', value)}
                 autoCapitalize="words"
+                textContentType="none"
+                autoComplete="off"
+                autoCorrect={false}
+                spellCheck={false}
+                importantForAutofill="no"
+                name="reg_first_name"
             />
             </View>
 
@@ -101,6 +110,11 @@ const RegisterScreen = ({navigation}) => {
                 onChangeText={(value) => updateField('lastName', value)}
                 autoCapitalize="none"
                 autoCorrect={false}
+                textContentType="none"
+                autoComplete="off"
+                spellCheck={false}
+                importantForAutofill="no"
+                name="reg_last_name"
             />
             </View>
 
@@ -113,38 +127,86 @@ const RegisterScreen = ({navigation}) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                textContentType="none"
+                autoComplete="off"
+                spellCheck={false}
+                importantForAutofill="no"
+                name="reg_email"
                 />
             </View>
 
             <View style={styles.formGroup}>
-            <TextInput
-                style={styles.input}
-                placeholder="Organization password"
-                value={formData.orgPassword}
-                onChangeText={(value) => updateField('orgPassword', value)}
-                secureTextEntry
-                autoCapitalize="none"
-            />
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Organization password"
+                        value={formData.orgPassword}
+                        onChangeText={(value) => updateField('orgPassword', value)}
+                        autoCapitalize="none"
+                        textContentType="none"
+                        autoComplete="off"
+                        autoCorrect={false}
+                        spellCheck={false}
+                        importantForAutofill="no"
+                        name="reg_org_pass"
+                    />
+                </View>
             </View>
             <View style={styles.formGroup}>
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={formData.password}
-                onChangeText={(value) => updateField('password', value)}
-                secureTextEntry
-                autoCapitalize="none"
-            />
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Create new password"
+                        value={formData.password}
+                        onChangeText={(value) => updateField('password', value)}
+                        secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                        textContentType="none"
+                        autoComplete="off"
+                        autoCorrect={false}
+                        spellCheck={false}
+                        importantForAutofill="no"
+                        name="reg_new_pass"
+                    />
+                    <TouchableOpacity 
+                        style={styles.eyeIcon}
+                        onPress={() => setShowPassword(!showPassword)}
+                    >
+                        <Ionicons 
+                            name={showPassword ? "eye-off" : "eye"} 
+                            size={20} 
+                            color="#666" 
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
             <View style={styles.formGroup}>
-            <TextInput
-                style={styles.input}
-                placeholder="Confirm password"
-                value={formData.confirmPassword}
-                onChangeText={(value) => updateField('confirmPassword', value)}
-                secureTextEntry
-                autoCapitalize="none"
-            />
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Confirm new password"
+                        value={formData.confirmPassword}
+                        onChangeText={(value) => updateField('confirmPassword', value)}
+                        secureTextEntry={!showConfirmPassword}
+                        autoCapitalize="none"
+                        textContentType="none"
+                        autoComplete="off"
+                        autoCorrect={false}
+                        spellCheck={false}
+                        importantForAutofill="no"
+                        name="reg_confirm_pass"
+                    />
+                    <TouchableOpacity 
+                        style={styles.eyeIcon}
+                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                        <Ionicons 
+                            name={showConfirmPassword ? "eye-off" : "eye"} 
+                            size={20} 
+                            color="#666" 
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <TouchableOpacity style={styles.button} onPress={onSubmit}>
@@ -211,6 +273,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
+    flex: 1,
+    },
+    inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    },
+    eyeIcon: {
+    paddingHorizontal: 15,
+    paddingVertical: 12,
     },
     button: {
     backgroundColor: '#007AFF',

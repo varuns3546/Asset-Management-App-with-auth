@@ -1,2 +1,1 @@
-* Need to check org password to set role 
-* Populate entryController.js
+* inconsistent json responses. 

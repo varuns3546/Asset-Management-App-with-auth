@@ -15,7 +15,8 @@ export const loadUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const user = await AsyncStorage.getItem('user')
-      return user ? JSON.parse(user) : null
+      const parsedUser = user ? JSON.parse(user) : null
+      return parsedUser
     } catch (error) {
       return thunkAPI.rejectWithValue('Failed to load user from storage')
     }

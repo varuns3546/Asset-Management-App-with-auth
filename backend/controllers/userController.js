@@ -56,7 +56,8 @@ const registerUser = asyncHandler(async (req, res) => {
         email: signUpData.user.email,
         firstName: firstName,
         lastName: lastName,
-        role: role   
+        role: role,
+        token: signUpData.session.access_token
     })
 })
 

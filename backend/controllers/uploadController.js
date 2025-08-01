@@ -326,6 +326,17 @@ const uploadDocument = [
   upload.single('document'),
   asyncHandler(async (req, res) => {
     try {
+      console.log('Upload document request:', {
+        body: req.body,
+        file: req.file ? {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size
+        } : null,
+        headers: req.headers,
+        contentType: req.headers['content-type']
+      });
+      
       if (!req.file) {
         return res.status(400).json({
           success: false,
@@ -340,18 +351,40 @@ const uploadDocument = [
         success: true,
         message: 'Document uploaded successfully',
         data: {
-          ...uploadResult,
+          id: uploadResult.fileName, // Use fileName as id for consistency
+          name: uploadResult.fileName,
+          size: uploadResult.fileSize,
+          sizeFormatted: uploadResult.fileSizeFormatted,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
           type: 'document'
         }
       });
     } catch (error) {
+      console.error('Document upload error:', error);
       res.status(500).json({
         success: false,
         message: 'Document upload failed',
         error: error.message
       });
     }
-  })
+  }),
+  // Error handling middleware for multer
+  (error, req, res, next) => {
+    console.error('Multer error:', error);
+    if (error instanceof multer.MulterError) {
+      return res.status(400).json({
+        success: false,
+        message: 'File upload error',
+        error: error.message
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Upload failed',
+      error: error.message
+    });
+  }
 ];
 
 // Upload photo with multer middleware
@@ -359,6 +392,15 @@ const uploadPhoto = [
   upload.single('photo'),
   asyncHandler(async (req, res) => {
     try {
+      console.log('Upload photo request:', {
+        body: req.body,
+        file: req.file ? {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size
+        } : null
+      });
+      
       if (!req.file) {
         return res.status(400).json({
           success: false,
@@ -373,18 +415,40 @@ const uploadPhoto = [
         success: true,
         message: 'Photo uploaded successfully',
         data: {
-          ...uploadResult,
+          id: uploadResult.fileName, // Use fileName as id for consistency
+          name: uploadResult.fileName,
+          size: uploadResult.fileSize,
+          sizeFormatted: uploadResult.fileSizeFormatted,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
           type: 'photo'
         }
       });
     } catch (error) {
+      console.error('Photo upload error:', error);
       res.status(500).json({
         success: false,
         message: 'Photo upload failed',
         error: error.message
       });
     }
-  })
+  }),
+  // Error handling middleware for multer
+  (error, req, res, next) => {
+    console.error('Multer error:', error);
+    if (error instanceof multer.MulterError) {
+      return res.status(400).json({
+        success: false,
+        message: 'File upload error',
+        error: error.message
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Upload failed',
+      error: error.message
+    });
+  }
 ];
 
 // Delete document

@@ -7,9 +7,8 @@ import { useEffect, useState } from 'react';
 import { loadUser } from './src/features/auth/authSlice';
 import RegisterScreen from './src/screens/RegisterScreen';
 import LoginScreen from './src/screens/LoginScreen';
-import DashboardScreen from './src/screens/DashboardScreen';
+import MainTabScreen from './src/screens/MainTabScreen';
 import Spinner from './src/components/Spinner';
-
 const Stack = createNativeStackNavigator();
 
 
@@ -41,7 +40,7 @@ function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={user ? 'Dashboard' : 'Login'}
+        initialRouteName={user ? 'MainTabs' : 'Login'}
         screenOptions={{
           headerStyle: {
             backgroundColor: '#007AFF',
@@ -57,8 +56,8 @@ function AppNavigator() {
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="Dashboard"
-            component={DashboardScreen}
+            name="MainTabs"
+            component={MainTabScreen}
             options={{ headerShown: false }}
           />
           <Stack.Screen
@@ -66,7 +65,7 @@ function AppNavigator() {
             component={RegisterScreen}
             options={{ headerShown: false }}
           />
-        
+
       </Stack.Navigator>
     </NavigationContainer>
   );

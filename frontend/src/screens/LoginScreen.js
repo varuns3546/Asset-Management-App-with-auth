@@ -39,7 +39,7 @@ const LoginScreen = ({navigation}) => {
         }
 
         if (isSuccess || user) {
-            navigation.navigate('Dashboard')
+            navigation.navigate('MainTabs')
         }
 
         dispatch(reset())

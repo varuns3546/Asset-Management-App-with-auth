@@ -27,16 +27,18 @@ const EntryForm = ({navigation}) => {
         <View style={styles.container}>
             <Text style={styles.title}>Add New Entry</Text>
             <TextInput
-                style={styles.input}
+                style={styles.titleInput}
                 placeholder="Title"
                 value={formData.title}
                 onChangeText={(value) => handleChange('title', value)}
             />  
             <TextInput
-                style={styles.input}
+                style={styles.contentInput}
                 placeholder="Content"
                 value={formData.content}
                 onChangeText={(value) => handleChange('content', value)}
+                multiline={true}
+                textAlignVertical="top"
             />
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={styles.buttonText}>Add Entry</Text>
@@ -57,12 +59,29 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 16,
     },
+    titleInput: {
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        marginBottom: 16,
+    },
     input: {
         height: 40,
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 10,
+        marginBottom: 16,
+    },
+    contentInput: {
+        height: 120,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 10,
         marginBottom: 16,
     },
     button: {

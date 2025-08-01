@@ -40,7 +40,7 @@ const RegisterScreen = ({navigation}) => {
            console.log('error', message) 
         }
         if(isSuccess || user){
-            navigation.navigate('Dashboard')
+            navigation.navigate('MainTabs')
         }
     }, [user, isError, isSuccess, message, dispatch])
 

@@ -1,13 +1,14 @@
 import { useEffect } from 'react'
-import {ScrollView, View, Text, StyleSheet, TouchableOpacity, SafeAreaView} from 'react-native'
+import {ScrollView, View, Text, StyleSheet, SafeAreaView} from 'react-native'
 import {useSelector, useDispatch} from 'react-redux'
 import EntryForm from '../components/EntryForm'
 import EntryItem from '../components/EntryItem'
 import Spinner from '../components/Spinner'
+import Header from '../components/Header'
 import { getEntries, reset } from '../features/entries/entrySlice'
-import { loadUser, logout } from '../features/auth/authSlice'
+import { loadUser } from '../features/auth/authSlice'
 
-const DashboardScreen = ({navigation}) => {
+const CreateEntryScreen = ({navigation}) => {
     const dispatch = useDispatch()
     const {entries, isError, isLoading, message} = useSelector((state) => state.entries)
     
@@ -34,24 +35,9 @@ const DashboardScreen = ({navigation}) => {
         }
     }, [isError, message])
 
-    const handleLogout = () => {
-        dispatch(logout())
-        navigation.navigate('Login')
-    }
-
     return(
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.headerContent}>
-                    <View>
-                        <Text style={styles.welcomeText}>Welcome back,</Text>
-                        <Text style={styles.userName}>{user && user.firstName}</Text>
-                    </View>
-                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                        <Text style={styles.logoutText}>Logout</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <Header user={user} navigation={navigation} />
 
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
@@ -97,56 +83,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8f9fa',
-    },
-    header: {
-        backgroundColor: '#ffffff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e9ecef',
-        paddingTop: 10,
-        paddingBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    headerContent: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-    },
-    welcomeText: {
-        fontSize: 14,
-        color: '#6c757d',
-        marginBottom: 2,
-    },
-    userName: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#212529',
-    },
-    logoutButton: {
-        backgroundColor: '#dc3545',
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 3,
-    },
-    logoutText: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '600',
     },
     scrollView: {
         flex: 1,
@@ -329,4 +265,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default DashboardScreen
+export default CreateEntryScreen

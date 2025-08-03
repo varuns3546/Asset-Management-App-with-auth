@@ -1,8 +1,9 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
 import CreateEntryScreen from './CreateEntryScreen';
 import UploadScreen from './UploadScreen';
+import { Text } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,12 +15,12 @@ const MainTabScreen = ({ navigation }) => {
           let iconName;
 
           if (route.name === 'CreateEntries') {
-            iconName = focused ? 'add-circle' : 'add-circle-outline';
+            iconName = focused ? '➕' : '➕';
           } else if (route.name === 'Upload') {
-            iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
+            iconName = focused ? '☁️' : '☁️';
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Text style={{ fontSize: size, color: color }}>{iconName}</Text>;
         },
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',

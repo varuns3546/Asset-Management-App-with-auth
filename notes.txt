@@ -1,1 +1,4 @@
 * inconsistent json responses. 
+* Password autofills for the register screen. remove this. ✓ COMPLETED
+* npm install warnings and vulnerabilities - CONSERVATIVE APPROACH: Keep Expo 50, ignore deprecation warnings, focus on critical security only
+* Babel runtime error with @expo/vector-icons - TEMPORARY FIX: Replaced Ionicons with text/emoji icons to avoid the error 

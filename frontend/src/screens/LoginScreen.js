@@ -12,7 +12,7 @@ import {
   ScrollView
 } from 'react-native'
 import {useSelector, useDispatch} from 'react-redux'
-import { Ionicons } from '@expo/vector-icons'
+// import { Ionicons } from '@expo/vector-icons'
 import { login, reset } from '../features/auth/authSlice'
 import Spinner from '../components/Spinner'
 
@@ -70,7 +70,6 @@ const LoginScreen = ({navigation}) => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.heading}>
             <View style={styles.titleContainer}>
-                <Ionicons name="person" size={24} color="#007AFF" />
                 <Text style={styles.title}>Login</Text>
             </View>
         </View>
@@ -106,11 +105,11 @@ const LoginScreen = ({navigation}) => {
                         style={styles.eyeIcon}
                         onPress={() => setShowPassword(!showPassword)}
                     >
-                        <Ionicons 
-                            name={showPassword ? "eye-off" : "eye"} 
-                            size={20} 
-                            color="#666" 
-                        />
+                        <Text 
+                            style={styles.eyeIconText}
+                        >
+                            {showPassword ? "🙈" : "👁️"}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -190,6 +189,10 @@ const styles = StyleSheet.create({
     eyeIcon: {
     paddingHorizontal: 15,
     paddingVertical: 12,
+    },
+    eyeIconText: {
+        fontSize: 20,
+        color: '#666',
     },
     button: {
     backgroundColor: '#007AFF',

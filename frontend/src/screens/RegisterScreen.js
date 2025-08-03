@@ -12,7 +12,7 @@ import {
   Platform,
   ScrollView
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+// import { Ionicons } from '@expo/vector-icons'
 import {register, reset} from '../features/auth/authSlice'
 import Spinner from '../components/Spinner'
 const RegisterScreen = ({navigation}) => {
@@ -79,7 +79,6 @@ const RegisterScreen = ({navigation}) => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.heading}>
             <View style={styles.titleContainer}>
-            <Ionicons name="person" size={24} color="#007AFF" />
             <Text style={styles.title}>Register</Text>
             </View>
             <Text style={styles.subtitle}>Create an account</Text>
@@ -149,6 +148,9 @@ const RegisterScreen = ({navigation}) => {
                         spellCheck={false}
                         importantForAutofill="no"
                         name="reg_org_pass"
+                        secureTextEntry={true}
+                        autoCompleteType="off"
+                        dataDetectorTypes="none"
                     />
                 </View>
             </View>
@@ -167,16 +169,18 @@ const RegisterScreen = ({navigation}) => {
                         spellCheck={false}
                         importantForAutofill="no"
                         name="reg_new_pass"
+                        autoCompleteType="off"
+                        dataDetectorTypes="none"
                     />
                     <TouchableOpacity 
                         style={styles.eyeIcon}
                         onPress={() => setShowPassword(!showPassword)}
                     >
-                        <Ionicons 
-                            name={showPassword ? "eye-off" : "eye"} 
-                            size={20} 
-                            color="#666" 
-                        />
+                        <Text 
+                            style={styles.eyeIconText}
+                        >
+                            {showPassword ? "eye-off" : "eye"}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -195,16 +199,18 @@ const RegisterScreen = ({navigation}) => {
                         spellCheck={false}
                         importantForAutofill="no"
                         name="reg_confirm_pass"
+                        autoCompleteType="off"
+                        dataDetectorTypes="none"
                     />
                     <TouchableOpacity 
                         style={styles.eyeIcon}
                         onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
-                        <Ionicons 
-                            name={showConfirmPassword ? "eye-off" : "eye"} 
-                            size={20} 
-                            color="#666" 
-                        />
+                        <Text 
+                            style={styles.eyeIconText}
+                        >
+                            {showConfirmPassword ? "eye-off" : "eye"}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -286,6 +292,10 @@ const styles = StyleSheet.create({
     eyeIcon: {
     paddingHorizontal: 15,
     paddingVertical: 12,
+    },
+    eyeIconText: {
+        fontSize: 20,
+        color: '#666',
     },
     button: {
     backgroundColor: '#007AFF',
